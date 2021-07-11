@@ -23,7 +23,7 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    const storagedCart =localStorage.getItem('@BrandNewShoe:cart');
+    const storagedCart = localStorage.getItem('@BrandNewShoe:cart');
 
     if (storagedCart) {
       return JSON.parse(storagedCart);
@@ -34,9 +34,35 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const addProduct = async (productId: number) => {
     try {
-      const updatedCart = [ ...cart ]
+      const updatedCart = [...cart]
       const productExistsOnCart = updatedCart.find(product => product.id === productId)
 
+      const stock = await api.get(`/stock/${productId}`)
+
+      const stockAmount = stock.data.amount
+      const currentAmount = productExistsOnCart ? productExistsOnCart.amount : 0
+      const desiredAmount = currentAmount + 1
+
+
+      if (desiredAmount > stockAmount) {
+        toast.error('Quantidade solicitada fora de estoque');
+        return;
+      }
+
+      if (productExistsOnCart) {
+        productExistsOnCart.amount = desiredAmount
+      } else {
+        const product = await api.get(`/products/${productId}`)
+
+        const newProduct = {
+          ...product.data,
+          amount: 1
+        }
+        updatedCart.push(newProduct);
+      }
+
+      setCart(updatedCart)
+      localStorage.setItem('@BrandNewShoe:cart', JSON.stringify(updatedCart))
     } catch {
       toast.error('Erro na adição do produto');
     }
@@ -44,9 +70,9 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
-      TODO
+      // TODO
     } catch {
-      TODO
+      // TODO
     }
   };
 
@@ -55,9 +81,9 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      TODO
+      // TODO
     } catch {
-      TODO
+      // TODO
     }
   };
 
