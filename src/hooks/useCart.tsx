@@ -45,7 +45,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
 
       if (desiredAmount > stockAmount) {
-        toast.error('Quantidade solicitada fora de estoque');
+        toast.error('Required product amount out of stock');
         return;
       }
 
@@ -64,15 +64,25 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       setCart(updatedCart)
       localStorage.setItem('@BrandNewShoe:cart', JSON.stringify(updatedCart))
     } catch {
-      toast.error('Erro na adição do produto');
+      toast.error(`Error: Couldn't add product`);
     }
   };
 
   const removeProduct = (productId: number) => {
     try {
-      // TODO
+      const updatedCart = [...cart]
+      const productIndex = updatedCart.findIndex(product => product.id === productId)
+
+      if (productIndex >= 0) {
+        updatedCart.splice(productIndex, 1)
+        setCart(updatedCart)
+        localStorage.setItem('@BrandNewShoe:cart', JSON.stringify(updatedCart))
+
+      } else {
+        throw Error()
+      }
     } catch {
-      // TODO
+      toast.error(`Error: Couldn't remove product`);
     }
   };
 
@@ -81,9 +91,30 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      if (amount < 1) {
+        return
+      }
+      const stock = await api.get(`/stock/${productId}`)
+      const stockAmount = stock.data.amount
+
+      if (amount > stockAmount) {
+        toast.error('Required product amount out of Stock');
+        return
+      }
+
+      const updatedCart = [...cart]
+      const productExistsOnCart = updatedCart.find(product => product.id === productId)
+
+      if (productExistsOnCart) {
+        productExistsOnCart.amount = amount
+        setCart(updatedCart)
+        localStorage.setItem('@BrandNewShoe:cart', JSON.stringify(updatedCart))
+      } else {
+        throw Error()
+      }
+
     } catch {
-      // TODO
+      toast.error('Error changing product amount');
     }
   };
 
