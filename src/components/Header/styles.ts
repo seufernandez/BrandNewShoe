@@ -4,8 +4,12 @@ import { Link } from 'react-router-dom';
 export const Container = styled.header`
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
+	align-items: flex-end;
 	margin: 50px 0;
+
+	img{ 
+		height:100px;
+	}
 
 	a {
 		transition: opacity 0.2s;
